@@ -93,6 +93,7 @@ export const authorization = async (userName, password) => {
  * Удаление пользователя
  *
  * @param {string} userID
+ * @param {string} token
  */
 export const userDelete = async (userID, token) => {
     const response = await client.delete('/Account/v1/User/' + userID,
@@ -110,6 +111,7 @@ export const userDelete = async (userID, token) => {
 /**
  * Получение информации о пользователе
  * @param {string} userID
+ * @param {string} token
  */
 export const userInfo = async (userID, token) => {
     const response = await client.get('/Account/v1/User/' + userID,
