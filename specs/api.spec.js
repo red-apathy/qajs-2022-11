@@ -1,4 +1,3 @@
-import { getRandomArbitrary } from '../helpers/randomHelper'
 import * as apiHelpers from '../helpers/apiHelpers'
 import { faker } from '@faker-js/faker'
 
@@ -16,32 +15,32 @@ import { faker } from '@faker-js/faker'
 describe('5 апи-тестов на сервис bookstore', () => {
     test('Создание пользователя c ошибкой, логин уже используется', async () => {
         await apiHelpers.createUser('test', 'Test!0test')
-        const request = await apiHelpers.createUser('test', 'Test!0test')
+        const request = (await apiHelpers.createUser('test', 'Test!0test')).response
         expect(request.status).toBe(406)
         expect(request.data.code).toBe('1204')
         expect(request.data.message).toBe('User exists!')
     }),
 
-    test('Создание пользователя c ошибкой, пароль не подходит', async () => {
-        const request = await apiHelpers.createUser('test', 'Test')
-        expect(request.status).toBe(400)
-        expect(request.data.code).toBe('1300')
-        expect(request.data.message).toBe("Passwords must have at least one non alphanumeric character, one digit ('0'-'9'), one uppercase ('A'-'Z'), one lowercase ('a'-'z'), one special character and Password must be eight characters or longer.")
-    }),
+        test('Создание пользователя c ошибкой, пароль не подходит', async () => {
+            const request = (await apiHelpers.createUser('test', 'Test')).response
+            expect(request.status).toBe(400)
+            expect(request.data.code).toBe('1300')
+            expect(request.data.message).toBe("Passwords must have at least one non alphanumeric character, one digit ('0'-'9'), one uppercase ('A'-'Z'), one lowercase ('a'-'z'), one special character and Password must be eight characters or longer.")
+        }),
 
-    test('Создание пользователя успешно', async () => {
-        const userName = faker.internet.userName()
-        const request = await apiHelpers.createUser(userName, 'Test!0test')
-        expect(request.status).toBe(201)
-        expect(request.data.username).toBe(userName)
-    }),
+        test('Создание пользователя успешно', async () => {
+            const userName = faker.internet.userName()
+            const request = (await apiHelpers.createUser(userName, 'Test!0test')).response
+            expect(request.status).toBe(201)
+            expect(request.data.username).toBe(userName)
+        }),
 
-    test('Генерация токена c ошибкой', async () => {
-        const request = await apiHelpers.generateToken('test', faker.internet.password())
-        expect(request.response.status).toBe(200)
-        expect(request.response.data.status).toBe('Failed')
-        expect(request.response.data.token).toBe(null)
-    })
+        test('Генерация токена c ошибкой', async () => {
+            const request = await apiHelpers.generateToken('test', faker.internet.password())
+            expect(request.response.status).toBe(200)
+            expect(request.response.data.status).toBe('Failed')
+            expect(request.response.data.token).toBe(null)
+        })
 
     test('Генерация токена успешно', async () => {
         const userName = faker.internet.userName()
@@ -74,15 +73,21 @@ describe('Авторизация', () => {
 
 describe('Удаление пользователя', () => {
     test('Успешное удаление', async () => {
-        const response = await apiHelpers.userDelete()
-        expect(response.status).toBe(204)
+        const userName = faker.internet.userName()
+        const request = await apiHelpers.userDelete(
+            (await apiHelpers.createUser(userName, 'Test!0test')).userID,
+            (await apiHelpers.authorization(userName, 'Test!0test')).token)
+        expect(request.status).toBe(204)
 
     })
 })
 
 describe('Получение информации о пользователе', () => {
     test('Успешное получение информации о пользователе', async () => {
-        const request = await apiHelpers.userInfo()
+        const userName = faker.internet.userName()
+        const request = await apiHelpers.userInfo(
+            (await apiHelpers.createUser(userName, 'Test!0test')).userID,
+            (await apiHelpers.authorization(userName, 'Test!0test')).token)
         expect(request.status).toBe(200)
         expect(request.data).not.toBe(null)
 

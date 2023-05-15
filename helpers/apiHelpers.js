@@ -1,6 +1,5 @@
 import axios from 'axios'
 import config from '../config.js'
-import { faker } from '@faker-js/faker'
 
 const client = axios.create({
     baseURL: config.baseURL,
@@ -31,7 +30,10 @@ export const createUser = async (userName, password) => {
             'userName': userName,
             'password': password
         })
-    return response
+    return {
+        response: response,
+        userID: response.data.userID
+    }
 }
 
 /**
@@ -92,14 +94,13 @@ export const authorization = async (userName, password) => {
  *
  * @param {string} userID
  */
-export const userDelete = async () => {
-    const userID = (await createUser(config.credentials.userName, config.credentials.password)).data.userID
+export const userDelete = async (userID, token) => {
     const response = await client.delete('/Account/v1/User/' + userID,
         {
             headers:
             {
                 'Accept': 'application/json',
-                'Authorization': 'Bearer ' + (await authorization(config.credentials.userName, config.credentials.password)).token
+                'Authorization': 'Bearer ' + token
             }
         })
     return response
@@ -110,16 +111,13 @@ export const userDelete = async () => {
  * Получение информации о пользователе
  * @param {string} userID
  */
-export const userInfo = async () => {
-    const userName = faker.internet.userName()
-    const userID = (await createUser(userName, config.credentials.password)).data.userID
+export const userInfo = async (userID, token) => {
     const response = await client.get('/Account/v1/User/' + userID,
         {
             headers:
             {
-                'Authorization': 'Bearer ' + (await authorization(userName, config.credentials.password)).token
+                'Authorization': 'Bearer ' + token
             }
         })
-    await userDelete()
     return response
 }
