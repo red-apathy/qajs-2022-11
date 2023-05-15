@@ -1,4 +1,4 @@
-import * as apiHelpers from '../helpers/apiHelpers'
+import * as apiHelpers from '../framework/services/UserService'
 import { faker } from '@faker-js/faker'
 
 // Вариант 1:
